@@ -10,6 +10,28 @@ import os
 
 app = Flask(__name__)
 
+from db import get_connection
+
+@app.route("/test-db")
+def test_db():
+    try:
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1;")
+                result = cur.fetchone()
+        return f"Database connected successfully: {result}"
+    except Exception as e:
+        return f"Database connection failed: {str(e)}", 500
+
+import traceback
+
+@app.route("/")
+def index():
+    try:
+        products = get_all_products()
+        return render_template("index.html", products=products)
+    except Exception:
+        return f"<h2>Error on / route</h2><pre>{traceback.format_exc()}</pre>", 500
 @app.route("/")
 def index():
     products = get_all_products()
