@@ -1,10 +1,7 @@
 import os
-from dotenv import load_dotenv
 import psycopg
 
-load_dotenv()
-
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
 if not DATABASE_URL:
     raise ValueError("DATABASE_URL not set")
