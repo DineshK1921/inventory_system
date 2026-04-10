@@ -4,26 +4,13 @@ from inventory_service import (
     add_product,
     get_product_by_id,
     update_product,
-    delete_product
+    delete_product,
 )
 import os
+import traceback
 
 app = Flask(__name__)
 
-from db import get_connection
-
-@app.route("/test-db")
-def test_db():
-    try:
-        with get_connection() as conn:
-            with conn.cursor() as cur:
-                cur.execute("SELECT 1;")
-                result = cur.fetchone()
-        return f"Database connected successfully: {result}"
-    except Exception as e:
-        return f"Database connection failed: {str(e)}", 500
-
-import traceback
 
 @app.route("/")
 def index():
@@ -31,11 +18,8 @@ def index():
         products = get_all_products()
         return render_template("index.html", products=products)
     except Exception:
-        return f"<h2>Error on / route</h2><pre>{traceback.format_exc()}</pre>", 500
-@app.route("/")
-def index():
-    products = get_all_products()
-    return render_template("index.html", products=products)
+        return f"<h2>Error loading products</h2><pre>{traceback.format_exc()}</pre>", 500
+
 
 @app.route("/add", methods=["GET", "POST"])
 def add():
@@ -50,6 +34,7 @@ def add():
         return redirect(url_for("index"))
 
     return render_template("add_product.html")
+
 
 @app.route("/edit/<int:product_id>", methods=["GET", "POST"])
 def edit(product_id):
@@ -69,10 +54,26 @@ def edit(product_id):
 
     return render_template("edit_product.html", product=product)
 
+
 @app.route("/delete/<int:product_id>")
 def delete(product_id):
     delete_product(product_id)
     return redirect(url_for("index"))
+
+
+@app.route("/test-db")
+def test_db():
+    from db import get_connection
+
+    try:
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1;")
+                result = cur.fetchone()
+        return f"Database connected successfully: {result}"
+    except Exception:
+        return f"<h2>Database connection failed</h2><pre>{traceback.format_exc()}</pre>", 500
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

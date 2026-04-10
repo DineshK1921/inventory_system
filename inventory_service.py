@@ -1,5 +1,6 @@
 from db import get_connection
 
+
 def get_all_products():
     with get_connection() as conn:
         with conn.cursor() as cur:
@@ -10,18 +11,18 @@ def get_all_products():
             """)
             rows = cur.fetchall()
 
-    products = []
-    for row in rows:
-        products.append({
+    return [
+        {
             "id": row[0],
             "name": row[1],
             "category": row[2],
             "price": row[3],
             "quantity": row[4],
             "supplier": row[5],
-            "created_at": row[6]
-        })
-    return products
+            "created_at": row[6],
+        }
+        for row in rows
+    ]
 
 
 def add_product(name, category, price, quantity, supplier):
@@ -44,17 +45,18 @@ def get_product_by_id(product_id):
             """, (product_id,))
             row = cur.fetchone()
 
-    if row:
-        return {
-            "id": row[0],
-            "name": row[1],
-            "category": row[2],
-            "price": row[3],
-            "quantity": row[4],
-            "supplier": row[5],
-            "created_at": row[6]
-        }
-    return None
+    if not row:
+        return None
+
+    return {
+        "id": row[0],
+        "name": row[1],
+        "category": row[2],
+        "price": row[3],
+        "quantity": row[4],
+        "supplier": row[5],
+        "created_at": row[6],
+    }
 
 
 def update_product(product_id, name, category, price, quantity, supplier):
